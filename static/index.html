@@ -227,9 +227,9 @@
 
         function updateUsernameDisplay() {
             const username = localStorage.getItem('username');
-            if (username != "undefined" && !username) {
+            if (username != "undefined" && username != undefined) {
                 document.getElementById('username').textContent = username;
-            }else{
+            } else {
                 document.getElementById('username').textContent = "Unauthorized";
             }
         }
@@ -252,7 +252,7 @@
                 .then(data => {
                     saveTokenAndUsername(data);
                     console.log('Success:', data);
-                    if(data.code >= 400){
+                    if (data.code >= 400) {
                         showModal(data.message);
                     }
                 })
@@ -279,7 +279,7 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log('Success:', data);
-                    if(data.code >= 400){
+                    if (data.code >= 400) {
                         showModal(data.message);
                     }
                 })
@@ -317,7 +317,7 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log('Ad Posted:', data);
-                    if(data.code >= 400){
+                    if (data.code >= 400) {
                         showModal(data.message);
                     }
                     fetchAds(currentPage);
@@ -357,7 +357,7 @@
                 .then(data => {
                     totalPages = Math.ceil(parseInt(data.total) / adsPerPage);
                     console.log('Success:', data);
-                    if(data.code >= 400){
+                    if (data.code >= 400) {
                         showModal(data.message);
                     }
                     const adsElement = document.getElementById('ads');

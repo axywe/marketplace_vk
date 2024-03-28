@@ -128,230 +128,228 @@
 </head>
 
 <body>
-
-    <body>
-        <div class="container">
-            <div id="username">Unauthorized</div> <button id="logout">Logout</button>
-            <h2>Login</h2>
-            <form id="loginForm">
-                <input type="text" id="loginUsername" placeholder="Username" required><br>
-                <input type="password" id="loginPassword" placeholder="Password" required><br>
-                <button type="submit">Login</button>
-            </form>
-            <h2>Register</h2>
-            <form id="registerForm">
-                <input type="text" id="registerUsername" placeholder="Username" required><br>
-                <input type="password" id="registerPassword" placeholder="Password" required><br>
-                <button type="submit">Register</button>
-            </form>
-            <h2>Post Ad</h2>
-            <form id="postAdForm">
-                <input type="text" id="adTitle" placeholder="Title" required><br>
-                <input type="text" id="adDescription" placeholder="Description" required><br>
-                <input type="text" id="adImageURL" placeholder="Image URL" required><br>
-                <input type="number" id="adPrice" placeholder="Price" required><br>
-                <button type="submit">Post Ad</button>
-            </form>
-            <h2>Ads</h2>
-            <select id="sortType">
-                <option value="created_at">Date</option>
-                <option value="price">Price</option>
-            </select>
-            <select id="sortDirection">
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
-            </select>
-            <div>
-                <input type="number" id="priceMin" placeholder="Min Price">
-                <input type="number" id="priceMax" placeholder="Max Price">
-                <button id="applyFilters">Apply Filters</button>
-            </div>
-            <div id="ads"></div>
-            <div class="pagination">
-                <button id="prevPage">Prev</button>
-                <span id="currentPage">1</span>
-                <button id="nextPage">Next</button>
-            </div>
+    <!-- Очень плохой фронтенд, но работает (вроде) -->
+    <div class="container">
+        <div id="username">Unauthorized</div> <button id="logout">Logout</button>
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="text" id="loginUsername" placeholder="Username" required><br>
+            <input type="password" id="loginPassword" placeholder="Password" required><br>
+            <button type="submit">Login</button>
+        </form>
+        <h2>Register</h2>
+        <form id="registerForm">
+            <input type="text" id="registerUsername" placeholder="Username" required><br>
+            <input type="password" id="registerPassword" placeholder="Password" required><br>
+            <button type="submit">Register</button>
+        </form>
+        <h2>Post Ad</h2>
+        <form id="postAdForm">
+            <input type="text" id="adTitle" placeholder="Title" required><br>
+            <input type="text" id="adDescription" placeholder="Description" required><br>
+            <input type="text" id="adImageURL" placeholder="Image URL" required><br>
+            <input type="number" id="adPrice" placeholder="Price" required><br>
+            <button type="submit">Post Ad</button>
+        </form>
+        <h2>Ads</h2>
+        <select id="sortType">
+            <option value="created_at">Date</option>
+            <option value="price">Price</option>
+        </select>
+        <select id="sortDirection">
+            <option value="desc">Descending</option>
+            <option value="asc">Ascending</option>
+        </select>
+        <div>
+            <input type="number" id="priceMin" placeholder="Min Price">
+            <input type="number" id="priceMax" placeholder="Max Price">
+            <button id="applyFilters">Apply Filters</button>
         </div>
-        <script>
+        <div id="ads"></div>
+        <div class="pagination">
+            <button id="prevPage">Prev</button>
+            <span id="currentPage">1</span>
+            <button id="nextPage">Next</button>
+        </div>
+    </div>
+    <script>
+        let currentPage = 1;
+        const adsPerPage = 5;
+        var totalPages = 1;
+        function saveTokenAndUsername(data) {
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('username', data.username);
+            updateUsernameDisplay();
+        }
 
-            let currentPage = 1;
-            const adsPerPage = 5;
-            var totalPages = 1;
-            function saveTokenAndUsername(data) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('username', data.username);
-                updateUsernameDisplay();
+        function updateUsernameDisplay() {
+            const username = localStorage.getItem('username');
+            if (username) {
+                document.getElementById('username').textContent = username;
             }
-
-            function updateUsernameDisplay() {
-                const username = localStorage.getItem('username');
-                if (username) {
-                    document.getElementById('username').textContent = username;
-                }
-            }
-            document.getElementById('loginForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                var username = document.getElementById('loginUsername').value;
-                var password = document.getElementById('loginPassword').value;
-                fetch('/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username: username,
-                        password: password,
-                    }),
+        }
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var username = document.getElementById('loginUsername').value;
+            var password = document.getElementById('loginPassword').value;
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    saveTokenAndUsername(data);
+                    console.log('Success:', data);
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        saveTokenAndUsername(data);
-                        console.log('Success:', data);
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
-            });
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        });
 
-            document.getElementById('registerForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                var username = document.getElementById('registerUsername').value;
-                var password = document.getElementById('registerPassword').value;
-                fetch('/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username: username,
-                        password: password,
-                    }),
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var username = document.getElementById('registerUsername').value;
+            var password = document.getElementById('registerPassword').value;
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Success:', data);
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
-            });
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        });
 
-            document.getElementById('postAdForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-                var title = document.getElementById('adTitle').value;
-                var description = document.getElementById('adDescription').value;
-                var imageURL = document.getElementById('adImageURL').value;
-                var price = document.getElementById('adPrice').value;
-                console.log(JSON.stringify({
+        document.getElementById('postAdForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var title = document.getElementById('adTitle').value;
+            var description = document.getElementById('adDescription').value;
+            var imageURL = document.getElementById('adImageURL').value;
+            var price = document.getElementById('adPrice').value;
+            console.log(JSON.stringify({
+                title: title,
+                description: description,
+                image_url: imageURL,
+                price: price,
+            }));
+            fetch('/ads', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                     title: title,
                     description: description,
                     image_url: imageURL,
-                    price: price,
-                }));
-                fetch('/ads', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        title: title,
-                        description: description,
-                        image_url: imageURL,
-                        price: parseFloat(price),
-                    }),
+                    price: parseFloat(price),
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Ad Posted:', data);
+                    fetchAds(currentPage);
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Ad Posted:', data);
-                        fetchAds(currentPage);
-                    })
-                    .catch((error) => {
-                        console.log('Error posting ad:', error);
-                        fetchAds(currentPage);
-                    });
-            });
+                .catch((error) => {
+                    console.log('Error posting ad:', error);
+                    fetchAds(currentPage);
+                });
+        });
 
-            function updateCurrentPageDisplay() {
-                document.getElementById('currentPage').textContent = currentPage.toString();
+        function updateCurrentPageDisplay() {
+            document.getElementById('currentPage').textContent = currentPage.toString();
+        }
+
+        function fetchAds(page) {
+            const sortType = document.getElementById('sortType').value;
+            const sortDirection = document.getElementById('sortDirection').value;
+            const priceMin = document.getElementById('priceMin').value;
+            const priceMax = document.getElementById('priceMax').value;
+
+            let query = `/ads?limit=${adsPerPage}&offset=${(page - 1) * adsPerPage}`;
+            query += `&sortType=${sortType}&sortDirection=${sortDirection}`;
+            if (priceMin) {
+                query += `&priceMin=${priceMin}`;
+            }
+            if (priceMax) {
+                query += `&priceMax=${priceMax}`;
             }
 
-            function fetchAds(page) {
-                const sortType = document.getElementById('sortType').value;
-                const sortDirection = document.getElementById('sortDirection').value;
-                const priceMin = document.getElementById('priceMin').value;
-                const priceMax = document.getElementById('priceMax').value;
-
-                let query = `/ads?limit=${adsPerPage}&offset=${(page - 1) * adsPerPage}`;
-                query += `&sortType=${sortType}&sortDirection=${sortDirection}`;
-                if (priceMin) {
-                    query += `&priceMin=${priceMin}`;
-                }
-                if (priceMax) {
-                    query += `&priceMax=${priceMax}`;
-                }
-
-                fetch(query, {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
-                    },
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        totalPages = Math.ceil(parseInt(data.total) / adsPerPage);
-                        console.log('Success:', data);
-                        const adsElement = document.getElementById('ads');
-                        adsElement.innerHTML = '';
-                        data.ads.forEach(ad => {
-                            const adElement = document.createElement('div');
-                            adElement.id = "adElement";
-                            adElement.innerHTML = `<strong>Title:</strong> ${ad.title}<br>
+            fetch(query, {
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    totalPages = Math.ceil(parseInt(data.total) / adsPerPage);
+                    console.log('Success:', data);
+                    const adsElement = document.getElementById('ads');
+                    adsElement.innerHTML = '';
+                    data.ads.forEach(ad => {
+                        const adElement = document.createElement('div');
+                        adElement.id = "adElement";
+                        adElement.innerHTML = `<strong>Title:</strong> ${ad.title}<br>
                                            <strong>Description:</strong> ${ad.description}<br>
                                            <strong>Price:</strong> ${ad.price} Рублей<br>
                                            <strong>Creator:</strong> ${ad.author}<br>`;
-                            const imgElement = document.createElement("img");
-                            imgElement.src = ad.image_url;
-                            adElement.appendChild(imgElement);
-                            adsElement.appendChild(adElement);
-                        });
-                        updateCurrentPageDisplay();
-                    })
-                    .catch(error => {
-                        console.error('Error fetching ads:', error);
+                        const imgElement = document.createElement("img");
+                        imgElement.src = ad.image_url;
+                        adElement.appendChild(imgElement);
+                        adsElement.appendChild(adElement);
                     });
+                    updateCurrentPageDisplay();
+                })
+                .catch(error => {
+                    console.error('Error fetching ads:', error);
+                });
+        }
+
+        document.getElementById('logout').addEventListener('click', function () {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            location.reload();
+        });
+
+
+        document.getElementById('nextPage').addEventListener('click', function () {
+            if (currentPage >= totalPages) {
+                return;
             }
+            currentPage += 1;
+            fetchAds(currentPage);
+        });
 
-            document.getElementById('logout').addEventListener('click', function () {
-                localStorage.removeItem('token');
-                localStorage.removeItem('username');
-                location.reload();
-            });
+        document.getElementById('prevPage').addEventListener('click', function () {
+            currentPage = Math.max(1, currentPage - 1);
+            fetchAds(currentPage);
+        });
 
+        document.addEventListener('DOMContentLoaded', function () {
+            updateUsernameDisplay();
+            fetchAds(currentPage);
+        });
 
-            document.getElementById('nextPage').addEventListener('click', function () {
-                if (currentPage >= totalPages) {
-                    return;
-                }
-                currentPage += 1;
-                fetchAds(currentPage);
-            });
-
-            document.getElementById('prevPage').addEventListener('click', function () {
-                currentPage = Math.max(1, currentPage - 1);
-                fetchAds(currentPage);
-            });
-
-            document.addEventListener('DOMContentLoaded', function () {
-                updateUsernameDisplay();
-                fetchAds(currentPage);
-            });
-
-            document.getElementById('applyFilters').addEventListener('click', function () {
-                currentPage = 1;
-                fetchAds(currentPage);
-            });
-        </script>
-    </body>
+        document.getElementById('applyFilters').addEventListener('click', function () {
+            currentPage = 1;
+            fetchAds(currentPage);
+        });
+    </script>
+</body>
 
 </html>

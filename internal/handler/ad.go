@@ -29,7 +29,22 @@ func (h *Handler) PostAd(w http.ResponseWriter, r *http.Request) {
 
 	ad.Author = r.Context().Value(util.ContextKey("username")).(string)
 
-	if ad.Title == "" || ad.Description == "" || ad.ImageURL == "" || len([]rune(ad.ImageURL)) > 255 || len([]rune(ad.Title)) > 255 || len([]rune(ad.Description)) > 255 || ad.Price <= 0 || ad.Price > 1000000 || !util.IsValidImage(ad.ImageURL) {
+	switch util.IsValidImage(ad.ImageURL) {
+	case -1:
+		util.SendJSONError(w, r, "Invalid image URL", http.StatusBadRequest)
+		return
+	case -2:
+		util.SendJSONError(w, r, "Invalid image format", http.StatusBadRequest)
+		return
+	case -3:
+		util.SendJSONError(w, r, "Invalid image format", http.StatusBadRequest)
+		return
+	case -4:
+		util.SendJSONError(w, r, "Image too large", http.StatusBadRequest)
+		return
+	}
+
+	if ad.Title == "" || ad.Description == "" || ad.ImageURL == "" || len([]rune(ad.ImageURL)) > 255 || len([]rune(ad.Title)) > 255 || len([]rune(ad.Description)) > 255 || ad.Price <= 0 || ad.Price > 1000000 {
 		util.SendJSONError(w, r, "Invalid ad", http.StatusBadRequest)
 		return
 	}

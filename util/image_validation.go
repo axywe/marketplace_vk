@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -9,18 +8,16 @@ import (
 	"net/http"
 )
 
-func IsValidImage(url string) bool {
+func IsValidImage(url string) int {
 	response, err := http.Get(url)
 	if err != nil {
-		fmt.Println("Ошибка при загрузке изображения:", err)
-		return false
+		return -1
 	}
 	defer response.Body.Close()
 
 	img, format, err := image.Decode(response.Body)
 	if err != nil {
-		fmt.Println("Ошибка при декодировании изображения:", err)
-		return false
+		return -2
 	}
 
 	isValidFormat := false
@@ -29,8 +26,7 @@ func IsValidImage(url string) bool {
 		isValidFormat = true
 	}
 	if !isValidFormat {
-		fmt.Println("Недопустимый формат изображения")
-		return false
+		return -3
 	}
 
 	bounds := img.Bounds()
@@ -38,9 +34,8 @@ func IsValidImage(url string) bool {
 	height := bounds.Max.Y
 
 	if width > 1024 || height > 1024 {
-		fmt.Println("Размер изображения превышает 1024x1024 пикселей")
-		return false
+		return -4
 	}
 
-	return true
+	return 0
 }

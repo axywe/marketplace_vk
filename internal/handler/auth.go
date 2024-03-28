@@ -36,7 +36,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u.Password = "" // Don't return the password
+	u.Password = ""
 	util.SendJSONResponse(w, r, u, u.Username, http.StatusCreated)
 }
 

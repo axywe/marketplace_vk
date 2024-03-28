@@ -44,7 +44,7 @@ func (h *Handler) PostAd(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetAds(w http.ResponseWriter, r *http.Request) {
 	limit, offset, sortType, sortDirection := 10, 0, "created_at", "desc"
-	priceMin, priceMax := 0.0, 1000000.0 // Set some default min and max price values
+	priceMin, priceMax := 0.0, 1000000.0
 
 	queryParams := r.URL.Query()
 
